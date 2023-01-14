@@ -9,10 +9,14 @@ import (
 	"time"
 )
 
+const usage string = ` Usage: clrd [options]
+ - clrd: Move the current content of the Downloads directory to a tmp path (defaults to $HOME/.clrd)
+ - clrd -purge: Remove the contents saved in the tmp path (defaults to $HOME/.clrd)
+`
+
 func main() {
 	flag.Usage = func() {
-		fmt.Printf("clrd: to move the contents of the Downloads directory to some tmp path.\n" +
-			"clrd -purge: to clear the contents of that tmp path\n")
+		fmt.Printf(usage)
 	}
 	purge := flag.Bool("purge", false, "specify to clear all saved download entries")
 	flag.Parse()
