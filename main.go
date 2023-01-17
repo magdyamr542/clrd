@@ -24,7 +24,7 @@ func main() {
 	// ensure relevant paths
 	home, err := os.UserHomeDir()
 	if err != nil {
-		log.Fatal("couldn't get user's home directory. set $HOME env variable")
+		log.Fatalf("couldn't get user's home directory. set $HOME env variable: %s\n", err.Error())
 	}
 
 	clrdPath := os.Getenv("CLRD_PATH")
@@ -34,17 +34,17 @@ func main() {
 
 	// purge if desired
 	if *purge {
-		if err := os.RemoveAll(clrdPath); err != nil {
-			log.Fatalf("couldn't clear from %s\n", clrdPath)
+		err := doPurge(clrdPath)
+		if err != nil {
+			log.Fatal(err)
 		}
-		fmt.Printf("cleared the content of %s\n", clrdPath)
 		return
 	}
 
 	if _, err := os.Stat(clrdPath); os.IsNotExist(err) {
 		err := os.MkdirAll(clrdPath, os.ModePerm)
 		if err != nil {
-			log.Fatalf("couldn't create the directory %s\n", clrdPath)
+			log.Fatalf("couldn't create the directory %s: %s\n", clrdPath, err.Error())
 		}
 	}
 
@@ -57,7 +57,7 @@ func main() {
 		}
 		files, err = os.ReadDir(downloadPath)
 		if err != nil {
-			log.Fatalf("error when listing %s\n", downloadPath)
+			log.Fatalf("error when listing %s: %s\n", downloadPath, err.Error())
 		}
 		if len(files) == 0 {
 			fmt.Println("nothing to clear")
@@ -71,7 +71,7 @@ func main() {
 	tStr := t.Format("2006-01-02 15:04:05")
 	savePath := filepath.Join(clrdPath, tStr)
 	if err := os.MkdirAll(savePath, os.ModePerm); err != nil {
-		log.Fatalf("couldn't create the directory %s\n", savePath)
+		log.Fatalf("couldn't create the directory %s: %s\n", savePath, err.Error())
 	}
 
 	for _, file := range files {
@@ -79,8 +79,28 @@ func main() {
 		newPath := filepath.Join(savePath, file.Name())
 		err := os.Rename(oldPath, newPath)
 		if err != nil {
-			log.Fatalf("couldn't move %s to %s", oldPath, newPath)
+			log.Fatalf("couldn't move %s to %s: %s\n", oldPath, newPath, err.Error())
 		}
 	}
 	fmt.Printf("moved data to %s\n", savePath)
+}
+
+func doPurge(clrdPath string) error {
+	files, err := os.ReadDir(clrdPath)
+	if err != nil {
+		return fmt.Errorf("couldn't read %s: %s\n", clrdPath, err.Error())
+	}
+
+	if len(files) == 0 {
+		return nil
+	}
+
+	for _, f := range files {
+		if err := os.RemoveAll(filepath.Join(clrdPath, f.Name())); err != nil {
+			return fmt.Errorf("couldn't remove %s: %s\n", filepath.Join(clrdPath, f.Name()), err.Error())
+		}
+
+	}
+	fmt.Printf("cleared the content of %s\n", clrdPath)
+	return nil
 }
