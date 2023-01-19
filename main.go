@@ -11,14 +11,14 @@ import (
 
 const usage string = ` Usage: clrd [options]
  - clrd: Move the current content of the Downloads directory to a tmp path (defaults to $HOME/.clrd)
- - clrd -purge: Remove the contents saved in the tmp path (defaults to $HOME/.clrd)
+ - clrd -d: Remove the contents saved in the tmp path (defaults to $HOME/.clrd)
 `
 
 func main() {
 	flag.Usage = func() {
 		fmt.Printf(usage)
 	}
-	purge := flag.Bool("purge", false, "specify to clear all saved download entries")
+	del := flag.Bool("d", false, "specify to delete all saved download entries")
 	flag.Parse()
 
 	// ensure relevant paths
@@ -33,7 +33,7 @@ func main() {
 	}
 
 	// purge if desired
-	if *purge {
+	if *del {
 		err := doPurge(clrdPath)
 		if err != nil {
 			log.Fatal(err)
