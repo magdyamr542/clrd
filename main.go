@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"time"
 )
@@ -12,6 +13,7 @@ import (
 const usage string = ` Usage: clrd [options]
  - clrd: Move the current content of the Downloads directory to a tmp path (defaults to $HOME/.clrd)
  - clrd -d: Remove the contents saved in the tmp path (defaults to $HOME/.clrd)
+ - clrd -s: Show the size of the .clrd directory
 `
 
 func main() {
@@ -19,6 +21,7 @@ func main() {
 		fmt.Printf(usage)
 	}
 	del := flag.Bool("d", false, "specify to delete all saved download entries")
+	size := flag.Bool("s", false, "specify to show the size of the .clrd directory")
 	flag.Parse()
 
 	// ensure relevant paths
@@ -38,6 +41,16 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
+		return
+	}
+
+	// show size if desired
+	if *size {
+		size, err := doShowSize(clrdPath)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Printf(size)
 		return
 	}
 
@@ -103,4 +116,10 @@ func doPurge(clrdPath string) error {
 	}
 	fmt.Printf("cleared the content of %s\n", clrdPath)
 	return nil
+}
+
+func doShowSize(clrdPath string) (string, error) {
+	cmd := exec.Command("du", "-h", clrdPath)
+	output, err := cmd.Output()
+	return string(output), err
 }
