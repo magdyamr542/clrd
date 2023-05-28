@@ -3,12 +3,22 @@ type: docker
 name: default
 
 steps:
-  - name: build and test backend
+  - name: build
     image: golang:1.19
     commands:
       - go build
-      - go test
-      - echo "done"
+
+  - name: test with success
+    image: golang:1.19
+    commands:
+      - go test -v ./...
+
+  - name: test with failure
+    image: golang:1.19
+    commands:
+      - go test -v ./... --fail=$FAIL
+    environment:
+      FAIL: true
 
 trigger:
   ref:
