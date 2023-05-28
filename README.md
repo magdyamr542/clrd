@@ -1,1 +1,1 @@
-## Clear the Downloads directory but don't lose the contents
+## Clear the Downloads directory but don't lose the contents.
