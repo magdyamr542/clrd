@@ -3,10 +3,14 @@ type: docker
 name: default
 
 steps:
-- name: build and test backend
-  image: golang:1.19
-  commands:
-  - go build
-  - go test
-  - echo "done"
+  - name: build and test backend
+    image: golang:1.19
+    commands:
+      - go build
+      - go test
+      - echo "done"
 
+trigger:
+  ref:
+    - refs/heads/feature-*
+    - refs/tags/*
